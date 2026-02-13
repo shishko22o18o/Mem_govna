@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Настя ❤️ МЕМНЫЙ ТЕЛЕГРАМ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #fce4ec 0%, #ffe0f0 50%, #ffd9e8 100%);
+      color: #2d2d2d;
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path fill="%23ff99cc" d="M50 30c-5-10-20-10-25 0-5 10 5 25 25 35 20-10 30-25 25-35-5-10-20-10-25 0z"/></svg>');
+      background-size: 80px 80px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 0 30px rgba(255, 150, 200, 0.3);
+    }
+
+    .topbar {
+      background: rgba(255, 220, 240, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 16px 14px;
+      font-weight: 700;
+      font-size: 22px;
+      color: #b3406c;
+      text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #ffb3d1;
+    }
+
+    .topbar span {
+      background: #ffb3d1;
+      color: #9e2a5b;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-left: auto;
+    }
+
+    .chat-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+    }
+
+    .chat-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 28px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255, 200, 220, 0.7);
+      transition: all 0.2s;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(255, 160, 200, 0.1);
+    }
+
+    .chat-item:hover {
+      background: rgba(255, 230, 240, 0.9);
+      transform: scale(1.01);
+      border-color: #ffa5c3;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid white;
+      box-shadow: 0 4px 8px rgba(255, 100, 150, 0.3);
+    }
+
+    .chat-info {
+      flex: 1;
+    }
+
+    .chat-name {
+      font-weight: 700;
+      color: #87234f;
+      font-size: 17px;
+    }
+
+    .chat-last {
+      font-size: 14px;
+      color: #a04d6e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .chat-time {
+      font-size: 12px;
+      color: #b06d89;
+      background: rgba(255,255,240,0.5);
+      padding: 4px 8px;
+      border-radius: 30px;
+    }
+
+    .chat-window {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 245, 250, 0.85);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      display: flex;
+      flex-direction: column;
+      transition: left 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+      z-index: 10;
+      box-shadow: -10px 0 30px rgba(210, 120, 160, 0.3);
+    }
+
+    .chat-window.active {
+      left: 0;
+    }
+
+    .chat-header {
+      background: rgba(255, 210, 230, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 10px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid #ffbfd7;
+    }
+
+    .back {
+      cursor: pointer;
+      font-size: 26px;
+      color: #ad3f6b;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 8px rgba(255,120,160,0.3);
+      transition: 0.2s;
+    }
+
+    .back:hover {
+      background: #ffe5f0;
+    }
+
+    .chat-header .avatar {
+      width: 48px;
+      height: 48px;
+    }
+
+    #chatTitle {
+      font-weight: 700;
+      font-size: 18px;
+      color: #831d48;
+    }
+
+    #status {
+      font-size: 13px;
+      color: #c54773;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    #status::before {
+      content: '●';
+      color: #4caf50;
+      font-size: 10px;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .messages {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(255, 235, 245, 0.2);
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 22px;
+      font-size: 15px;
+      line-height: 1.4;
+      animation: messagePop 0.2s ease-out;
+      box-shadow: 0 2px 10px rgba(170, 100, 130, 0.15);
+      word-wrap: break-word;
+    }
+
+    @keyframes messagePop {
+      0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .sent {
+      align-self: flex-end;
+      background: #f9c9df;
+      color: #451f2f;
+      border-bottom-right-radius: 6px;
+    }
+
+    .received {
+      align-self: flex-start;
+      background: white;
+      color: #381f2b;
+      border-bottom-left-radius: 6px;
+    }
+
+    .time {
+      font-size: 10px;
+      color: #a5697e;
+      margin-left: 8px;
+      opacity: 0.8;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px 12px;
+      background: rgba(255, 220, 235, 0.6);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      gap: 8px;
+      border-top: 1px solid #ffbfd7;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #2f1d26;
+      font-size: 15px;
+      box-shadow: inset 0 2px 6px rgba(210, 120, 150, 0.2);
+    }
+
+    #userInput:focus {
+      outline: 2px solid #ff99c2;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 40px;
+      background: #ff99c2;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 4px 10px #fbb0cf;
+      transition: 0.15s;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ff80b5;
+      transform: scale(1.02);
+    }
+
+    .options-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 10px 0 5px;
+    }
+
+    .option-btn {
+      background: white;
+      border: 2px solid #ff99c2;
+      color: #b34e7a;
+      padding: 12px 18px;
+      border-radius: 40px;
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(255, 150, 200, 0.4);
+      cursor: pointer;
+      transition: 0.15s;
+      flex: 1 1 auto;
+      min-width: 120px;
+    }
+
+    .option-btn:hover {
+      background: #ffe2f0;
+      transform: scale(1.02);
+    }
+
+    .heart {
+      position: fixed;
+      font-size: 28px;
+      animation: floatUp 5s linear forwards;
+      z-index: 9999;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px hotpink);
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(10deg); opacity: 0; }
+    }
+
+    .desktop-hint {
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      text-align: center;
+      color: #b04e77;
+      text-shadow: 0 1px 4px white;
+      font-size: 16px;
+      background: rgba(255, 240, 245, 0.6);
+      padding: 6px;
+      border-radius: 40px;
+      width: fit-content;
+      margin: 0 auto;
+      backdrop-filter: blur(2px);
+    }
+  </style>
+</head>
+<body>
+
+<audio id="bgMusic" loop volume="0.2">
+  <source src="https://cdn.pixabay.com/audio/2023/09/17/audio_0b4a5e6f5d.mp3" type="audio/mpeg">
+</audio>
+
+<div class="app">
+  <div class="topbar">
+    🌸 Настя ❤️ МЕМ ЧАТ
+    <span>14 фев</span>
+  </div>
+  <div class="chat-list" id="chatList"></div>
+</div>
+
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="back" onclick="closeChat()">←</div>
+    <div class="avatar" id="chatAvatar"></div>
+    <div style="flex:1">
+      <div id="chatTitle"></div>
+      <div id="status">в сети</div>
+    </div>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div id="optionsArea" class="input-area" style="justify-content: center; display: none;"></div>
+  <div class="input-area" id="manualInputArea" style="display: flex;">
+    <input id="userInput" placeholder="Твоё сообщение..." autocomplete="off">
+    <button onclick="sendManualMessage()">💬</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const HER_NAME = 'Настя';
+
+    // ---------- МЕМНЫЕ АВАТАРКИ (SVG с текстом) ----------
+    const avatars = [
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23ff69b4'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='white' font-weight='bold'%3EМЕЛСТРОЙ%3C/text%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%234169E1'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='white' font-weight='bold'%3EДРУН%3C/text%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FFD700'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='black' font-weight='bold'%3EАРТУР%3C/text%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FFA07A'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='white' font-weight='bold'%3EЧАН%3C/text%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%239ACD32'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='white' font-weight='bold'%3EШУТ%3C/text%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FFB6C1'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='white' font-weight='bold'%3EРОМАН%3C/text%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%238A2BE2'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='white' font-weight='bold'%3EФИЛОСОФ%3C/text%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23DC143C'/%3E%3Ctext x='50' y='60' font-size='28' text-anchor='middle' fill='white' font-weight='bold'%3EТАЙНЫЙ%3C/text%3E%3C/svg%3E"
+    ];
+
+    // ==================== МЕМНЫЕ ДИАЛОГИ ====================
+    const chats = [
+      { // 0. Мелстрой
+        name: 'Мелстрой 🎙️',
+        dialog: [
+          { person: `Слышал, ты Настя чан? Ну та самая, с чана?`, options: [
+              { text: 'Да, я Настя чан!', nextPerson: 'Ого, респект! А я Мелстрой, люблю стримить и дристеть. Ты часто на чане сидишь?' },
+              { text: 'Не, я просто Настя', nextPerson: 'Жаль, а то я думал ты та самая легенда. Но всё равно привет! Го друнить?' }
+          ]},
+          { person: `У меня тут друны подъехали, говорят: "Мелстрой, а где Настя?" Ну я и решил написать.`, options: [
+              { text: 'Какие друны?', nextPerson: 'Ну друны — это мой клан! Друним всех, кто мимо проходит. Хочешь в друны?' },
+              { text: 'Привет, Мелстрой! Ты круто стримишь', nextPerson: 'О, спасибо! Подпишись на стрим, там Настю чан часто упоминаю.' }
+          ]},
+          { person: `А у тебя есть друны? Ты вообще в теме?`, options: [
+              { text: 'У меня свой друн (Артур)', nextPerson: 'Артур? Тот самый шопоголик? Привет Артуру!' },
+              { text: 'Нет, но хочу вступить', nextPerson: 'Лады, сейчас с Артуром перетру — он у нас главный по друнам.' }
+          ]},
+          { person: `Кстати, а ты знаешь, что Настя чан — это мем? Она как-то с чана упала, теперь её все так зовут.`, options: [
+              { text: 'Лол, не знала', nextPerson: 'Ну теперь знаешь! Друны ржут с этого.' },
+              { text: 'Я тот самый чан!', nextPerson: 'Офигеть! Легенда! Давай совместный стрим?' }
+          ]},
+          { person: `С 14 февраля, Настя! Пусть друны всегда будут с тобой.`, options: [
+              { text: 'И тебя, Мелстрой!', nextPerson: 'Заходи на стрим, там подарки!' },
+              { text: 'Спасибо, привет Артуру', nextPerson: 'Обязательно передам! Артур, привет!)' }
+          ]},
+          { person: `Ну я погнал друнить. Пока, Настя чан!`, options: [] }
+        ]
+      },
+      { // 1. Друн
+        name: 'Друн 🐉',
+        dialog: [
+          { person: `Привет, это Друн! Слышал, ты дружишь с Мелстроем?`, options: [
+              { text: 'Привет! Ну так, шапочно', nextPerson: 'А я его главный друн. Хочешь стать нашим друном?' }
+          ]},
+          { person: `У нас тут корпоратив друнов, все свои: Артур, Мелстрой, Настя чан... Придёшь?`, options: [
+              { text: 'А что делать надо?', nextPerson: 'Друнить! Смеяться, шутить, пить чай с чана.' },
+              { text: 'Я Настя чан, конечно приду', nextPerson: 'ВАУ! Та самая! Я твой фанат! Дай автограф друном.' }
+          ]},
+          { person: `А ты знаешь, почему друны смеются? Потому что у них есть чан с мемами.`, options: [
+              { text: 'Поделишься мемами?', nextPerson: 'Лови: мелстрой упал с чана, друн его ловит. Ржака.' },
+              { text: 'Обожаю мемы', nextPerson: 'Тогда ты своя. Привет от Артура, кстати!' }
+          ]},
+          { person: `С 14 февраля, Настя! Желаю, чтобы друны всегда были рядом.`, options: [
+              { text: 'Спасибо, друн!', nextPerson: 'Всегда пожалуйста. Передавай привет Мелстрою.' }
+          ]},
+          { person: `Ну я пошёл друнить с Артуром. Пока!`, options: [] }
+        ]
+      },
+      { // 2. Артур
+        name: 'Артур (шопоголик) 🛍️',
+        dialog: [
+          { person: `Привет, Настя! Это Артур. Слышал, ты коллекционируешь мемы про мелстроя?`, options: [
+              { text: 'Артур, привет! Да, обожаю', nextPerson: 'Отлично! У меня есть эксклюзив: как Мелстрой покупал чан.' },
+          ]},
+          { person: `Кстати, ты видела новый мем "Настя чан и друны"? Там Артур в главной роли.`, options: [
+              { text: 'Не видела, покажи!', nextPerson: 'Сейчас скину: "Артур говорит: друны, это Настя чан? – Не, это чан с Настей."' },
+          ]},
+          { person: `А давай задруним? У нас тут друн-клан, все свои.`, options: [
+              { text: 'А Мелстрой там?', nextPerson: 'Конечно, он главный дрищ.' },
+              { text: 'Я с вами', nextPerson: 'Принято! Добро пожаловать в семью.' }
+          ]},
+          { person: `С праздником, Настя! Пусть у тебя будет столько же денег, сколько у Мелстроя на карте.`, options: [
+              { text: 'Хаха, спасибо', nextPerson: 'И помни: друны не сдаются! Привет от Друна.' }
+          ]},
+          { person: `Ладно, побежал шопиться. Давай, Настя чан!`, options: [] }
+        ]
+      },
+      { // 3. Настя чан (персонаж)
+        name: 'Настя чан 🫖',
+        dialog: [
+          { person: `Привет, это Настя чан! Та самая, что упала с чана.`, options: [
+              { text: 'Ой, привет! Легенда!', nextPerson: 'Ага, теперь я мем. Мелстрой меня часто вспоминает.' },
+          ]},
+          { person: `Слышала, ты тоже Настя? Может, мы сёстры?`, options: [
+              { text: 'Может быть! А у тебя есть друны?', nextPerson: 'Конечно! Артур, Друн и даже Мелстрой.' },
+          ]},
+          { person: `Давай дружить? Будем вместе падать с чана.`, options: [
+              { text: 'Давай! А это больно?', nextPerson: 'Главное, чтобы друны поймали.' },
+          ]},
+          { person: `С 14 февраля, сестра! Пусть чан всегда будет полон мемов.`, options: [
+              { text: 'И тебя, Настя чан! ❤️', nextPerson: 'Передам привет Мелстрою и Артуру.' },
+          ]},
+          { person: `Пока, полечу на метле.`, options: [] }
+        ]
+      },
+      { // 4. Шутник (мемный)
+        name: 'Шутник 🤡',
+        dialog: [
+          { person: `Слыхала анекдот? Мелстрой заходит в чан, а там Настя...`, options: [
+              { text: 'И что дальше?', nextPerson: 'А дальше друны прибежали и начали друнить!' },
+          ]},
+          { person: `А ты знаешь, почему Артур всегда при деньгах? Потому что он шопоголик!`, options: [
+              { text: 'Лол', nextPerson: 'А ещё он дружит с Друном, представляешь?' },
+          ]},
+          { person: `Кстати, тёзка твоя — Настя чан — сегодня упала с чана. Пойдём ловить?`, options: [
+              { text: 'Бежим!', nextPerson: 'Друны уже в пути!' },
+          ]},
+          { person: `С 14 февраля! Желаю, чтобы твой чан всегда был полон смеха.`, options: [
+              { text: 'Спасибо, шутник!', nextPerson: 'Передавай привет Артуру.' },
+          ]},
+          { person: `Всё, я умотал.`, options: [] }
+        ]
+      },
+      { // 5. Романтик (с мемным оттенком)
+        name: 'Романтик 💘',
+        dialog: [
+          { person: `Настя, ты как мелстрой в моём сердце — всегда в тренде.`, options: [
+              { text: 'Ой, спасибо', nextPerson: 'Ты прекрасна, как друн на закате.' },
+          ]},
+          { person: `Я хочу подарить тебе чан, полный любви.`, options: [
+              { text: 'А там будут мемы?', nextPerson: 'Конечно, с Артуром и Мелстроем.' },
+          ]},
+          { person: `Ты согласна стать моей Настей чан?`, options: [
+              { text: 'Да', nextPerson: 'Ура! Теперь мы будем друнить вместе.' },
+          ]},
+          { person: `С 14 февраля, любимая! Пусть друны нас благословят.`, options: [
+              { text: '❤️', nextPerson: 'Привет Артуру и Мелстрою!' },
+          ]},
+          { person: `Целую, моя чан.`, options: [] }
+        ]
+      },
+      { // 6. Философ
+        name: 'Философ 📿',
+        dialog: [
+          { person: `Настя, задумайся: если мелстрой упал с чана, а рядом был друн, слышен ли звук?`, options: [
+              { text: 'Это глубокий вопрос', nextPerson: 'Философия друнов — вот ответ.' },
+          ]},
+          { person: `Артур сказал, что счастье не в шопинге, а в моменте, когда ты пьёшь чай с чана.`, options: [
+              { text: 'Мудро', nextPerson: 'Это всё опыт Насти чан.' },
+          ]},
+          { person: `Быть или не быть друном? Вот в чём вопрос.`, options: [
+              { text: 'Быть!', nextPerson: 'Тогда ты наша.' },
+          ]},
+          { person: `С 14 февраля. Пусть твой путь будет освещён мемами.`, options: [
+              { text: 'Спасибо, философ', nextPerson: 'И помни: друны вечны.' },
+          ]},
+          { person: `Пойду медитировать с Мелстроем.`, options: [] }
+        ]
+      },
+      { // 7. Тайный поклонник (Настя чан тематика)
+        name: 'Тайный 🤫',
+        dialog: [
+          { person: `Ты даже не знаешь, как я ждал этого 14 февраля.`, options: [
+              { text: 'Кто ты?', nextPerson: 'Я тот, кто видит в тебе Настю чан.' },
+          ]},
+          { person: `Ты красивее, чем Мелстрой в новом мерче.`, options: [
+              { text: 'Хаха, спасибо', nextPerson: 'И добрее, чем друн с похмелья.' },
+          ]},
+          { person: `Я хочу признаться: я — Артур. Шучу, я просто тайный поклонник.`, options: [
+              { text: 'Заинтриговал', nextPerson: 'Ещё я знаю, что ты любишь мемы про чан.' },
+          ]},
+          { person: `С 14 февраля, Настя! Будь счастлива с кем бы ты ни была.`, options: [
+              { text: 'Спасибо, тайный', nextPerson: 'Передай привет Друну от меня.' },
+          ]},
+          { person: `Я исчезаю...`, options: [] }
+        ]
+      }
+    ];
+
+    // ---------- DOM ----------
+    const chatListEl = document.getElementById('chatList');
+    const chatWindow = document.getElementById('chatWindow');
+    const chatTitle = document.getElementById('chatTitle');
+    const chatAvatar = document.getElementById('chatAvatar');
+    const messagesDiv = document.getElementById('messages');
+    const statusEl = document.getElementById('status');
+    const optionsArea = document.getElementById('optionsArea');
+    const manualInputArea = document.getElementById('manualInputArea');
+    const userInput = document.getElementById('userInput');
+
+    let currentChat = null;
+    let currentDialog = null;
+    let stepIndex = 0;
+    let timeoutId = null;
+    let waitingForUser = false;
+
+    // музыка
+    const music = document.getElementById('bgMusic');
+    music.volume = 0.2;
+    music.play().catch(() => {});
+
+    // заполнение списка чатов
+    chats.forEach((chat, i) => {
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.innerHTML = `
+        <div class="avatar" style="background-image:url('${avatars[i % avatars.length]}')"></div>
+        <div class="chat-info">
+          <div class="chat-name">${chat.name}</div>
+          <div class="chat-last">${chat.dialog[0]?.person || '...'}</div>
+        </div>
+        <div class="chat-time">❤️</div>
+      `;
+      div.onclick = () => openChat(i);
+      chatListEl.appendChild(div);
+    });
+
+    function openChat(index) {
+      if (timeoutId) clearTimeout(timeoutId);
+      currentChat = chats[index];
+      currentDialog = currentChat.dialog.slice();
+      stepIndex = 0;
+
+      chatTitle.innerText = currentChat.name;
+      chatAvatar.style.backgroundImage = `url('${avatars[index % avatars.length]}')`;
+      messagesDiv.innerHTML = '';
+      chatWindow.classList.add('active');
+      statusEl.innerText = 'в сети';
+
+      manualInputArea.style.display = 'flex';
+      optionsArea.style.display = 'none';
+      optionsArea.innerHTML = '';
+
+      showCurrentPersonMessage();
+    }
+
+    window.closeChat = function() {
+      chatWindow.classList.remove('active');
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+
+    function showCurrentPersonMessage() {
+      if (!currentDialog || stepIndex >= currentDialog.length) {
+        statusEl.innerText = 'онлайн';
+        optionsArea.style.display = 'none';
+        return;
+      }
+
+      const step = currentDialog[stepIndex];
+      statusEl.innerText = 'печатает...';
+
+      timeoutId = setTimeout(() => {
+        statusEl.innerText = 'в сети';
+        addMessage(step.person, 'received');
+        if (step.options && step.options.length > 0) {
+          showOptions(step.options);
+        } else {
+          optionsArea.style.display = 'none';
+        }
+      }, 1000);
+    }
+
+    function showOptions(options) {
+      optionsArea.innerHTML = '';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt.text;
+        btn.onclick = () => onOptionSelected(opt);
+        optionsArea.appendChild(btn);
+      });
+      optionsArea.style.display = 'flex';
+      waitingForUser = true;
+    }
+
+    function onOptionSelected(opt) {
+      if (!waitingForUser) return;
+      waitingForUser = false;
+      optionsArea.style.display = 'none';
+
+      statusEl.innerText = 'печатает...';
+      setTimeout(() => {
+        addMessage(opt.text, 'sent');
+        statusEl.innerText = 'в сети';
+
+        if (opt.nextPerson) {
+          timeoutId = setTimeout(() => {
+            addMessage(opt.nextPerson, 'received');
+            stepIndex++;
+            if (stepIndex < currentDialog.length) {
+              timeoutId = setTimeout(() => {
+                const nextStep = currentDialog[stepIndex];
+                addMessage(nextStep.person, 'received');
+                if (nextStep.options && nextStep.options.length > 0) {
+                  showOptions(nextStep.options);
+                } else {
+                  optionsArea.style.display = 'none';
+                }
+              }, 1200);
+            } else {
+              optionsArea.style.display = 'none';
+            }
+          }, 1000);
+        } else {
+          stepIndex++;
+          if (stepIndex < currentDialog.length) {
+            timeoutId = setTimeout(() => {
+              showCurrentPersonMessage();
+            }, 1200);
+          }
+        }
+      }, 800);
+    }
+
+    function addMessage(text, type) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${type}`;
+      const time = new Date().toLocaleTimeString('ru-Ru', { hour: '2-digit', minute: '2-digit' });
+      msgDiv.innerHTML = `${text} <span class="time">${time}</span>`;
+      messagesDiv.appendChild(msgDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    window.sendManualMessage = function() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      addMessage(text, 'sent');
+      userInput.value = '';
+      if (currentDialog && stepIndex < currentDialog.length) {
+        statusEl.innerText = 'печатает...';
+        setTimeout(() => {
+          statusEl.innerText = 'в сети';
+          addMessage('😄 мемный привет от Артура!', 'received');
+        }, 1500);
+      }
+    };
+
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.innerText = '❤️';
+      heart.style.left = Math.random() * 100 + '%';
+      heart.style.bottom = '0';
+      heart.style.fontSize = (15 + Math.random() * 30) + 'px';
+      heart.style.animationDuration = (3 + Math.random() * 4) + 's';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 5000);
+    }
+
+    window.addEventListener('load', () => {
+      for (let i = 0; i < 12; i++) setTimeout(createHeart, i * 200);
+    });
+
+    document.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.avatar')) {
+        for (let i = 0; i < 10; i++) setTimeout(createHeart, i * 40);
+      }
+    });
+  })();
+</script>
+
+<div class="desktop-hint">
+  ✨ Настя, с 14 февраля!  ❤️  (жми на чат и выбирай мемные ответы)
+</div>
+
+</body>
+</html>
